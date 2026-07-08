@@ -2,7 +2,6 @@
 // Reward tiers for race-end and weekly-end payouts.
 // "pixels" here means earnPixel() calls — random, mix of new/repeated.
 
-import { PUZZLE_VERSION } from '../context/PuzzleContext';
 
 export const RACE_END_REWARDS = [
   { minRank: 1,  maxRank: 3,        keys: 5, hourglasses: 3, pixels: 2 },
@@ -23,10 +22,10 @@ export function getRewardForRank(tiers, rank) {
 }
 
 // ── PUZZLE BOARD GRAND REWARD ──────────────────────────────────────────────
-// PUZZLE_ID is versioned so that bumping PUZZLE_VERSION (in PuzzleContext.jsx)
-// to launch a new board also lets the completion reward be claimed again —
-// otherwise addChips() would see the same taskId as already-completed and
-// silently block the payout forever.
-export const PUZZLE_ID = `puzzle_board_v${PUZZLE_VERSION}`;
-
+// Amounts here are for display only (notification text, popup). The real
+// payout amounts are hardcoded in the claim_puzzle_grand_reward RPC and
+// gated by a server-side timestamp (profiles.last_puzzle_claim_at) instead
+// of a static task id, so it can be claimed again every ~29 days per
+// account without needing a code deploy — keep these two in sync if you
+// ever change the reward amounts.
 export const PUZZLE_GRAND_REWARD = { chips: 50, keys: 50, hourglasses: 50 };

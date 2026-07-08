@@ -2,13 +2,17 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import { flyReward } from '../components/RewardFly';
 import { useAuth } from './AuthContext';
 import { useCountdown } from '../hooks/useCountdown';
-// ── 5×5 PIXEL ART BOARD ──────────────────────────────────────────────────────
+import { supabase } from '../lib/supabase';
+import { getPuzzleCycleIndex, getPuzzleCycleEnd } from '../lib/puzzleCycle';
+// ── 5×5 PIXEL ART BOARDS ─────────────────────────────────────────────────────
 // Each cell: { color: '#hex' } — the target picture.
-// Change colors here to make a different pixel art. Currently: a small rocket 🚀
-// Row-major order, top-left to bottom-right.
+// PUZZLE_BOARDS is an ordered list — every player's board automatically
+// advances to the next entry the moment their 30-day countdown ends
+// (wrapping back to the start once it reaches the end of the list).
+// To add the next picture: just push a new 64-cell array below.
 // Make sure everything above this line is completely closed off!
 
-export const BOARD_TARGET = [
+const KEY_BOARD = [
   // Row 1: Top loop of the key head
   { color: '#0D1B2A' }, { color: '#0D1B2A' }, { color: '#F4A600' }, { color: '#F4A600' }, { color: '#F4A600' }, { color: '#F4A600' }, { color: '#0D1B2A' }, { color: '#0D1B2A' },
   // Row 2: Hollow center of key head
@@ -25,6 +29,14 @@ export const BOARD_TARGET = [
   { color: '#0D1B2A' }, { color: '#0D1B2A' }, { color: '#0D1B2A' }, { color: '#F4A600' }, { color: '#F4A600' }, { color: '#F4A600' }, { color: '#F4A600' }, { color: '#0D1B2A' },
   // Row 8: Key tip
   { color: '#0D1B2A' }, { color: '#0D1B2A' }, { color: '#0D1B2A' }, { color: '#F4A600' }, { color: '#F4A600' }, { color: '#0D1B2A' }, { color: '#0D1B2A' }, { color: '#0D1B2A' }
+];
+
+export const PUZZLE_BOARDS = [
+  KEY_BOARD,
+  // Next picture goes here, e.g.:
+  // [
+  //   { color: '#...' }, { color: '#...' }, ... (64 cells total)
+  // ],
 ];
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -67,7 +79,6 @@ export const BUBBLES = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PuzzleContext = createContext(null);
-const PUZZLE_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // ── BUMP THIS to launch a new board design/reward cycle ──
 // Changing this number resets everyone's board + restarts the 30-day
@@ -80,38 +91,50 @@ export function PuzzleProvider({ children }) {
   const [revealed,  setRevealed]  = useState(new Set());
   const [repeated,  setRepeated]  = useState(0);
   const [hasNewPixel, setHasNewPixel] = useState(false);
-  const [puzzleStartedAt, setPuzzleStartedAt] = useState(null);
   const [hydrated, setHydrated] = useState(false);
   const completeFiredRef = useRef(false);
 
-  const deadline = puzzleStartedAt ? puzzleStartedAt + PUZZLE_DURATION_MS : null;
+  // cycleIndex and deadline are GLOBAL — every player is on the same
+  // picture at the same time, computed purely from wall-clock time
+  // (see lib/puzzleCycle.js), not stored per-user. This re-derives on
+  // every render, which is cheap and means it can't drift out of sync.
+  const cycleIndex = getPuzzleCycleIndex();
+  const boardTarget = PUZZLE_BOARDS[cycleIndex % PUZZLE_BOARDS.length];
+  const deadline = getPuzzleCycleEnd();
 
+  // The countdown hitting zero (or loading mid-cycle-change, handled in the
+  // hydrate effect below) is the only thing that starts a new board.
+  // Finishing early doesn't matter — everyone switches pictures together.
   function handlePuzzleExpire() {
-    if (revealed.size < 64) {
-      setRevealed(new Set());
-      setRepeated(0);
-      setPuzzleStartedAt(Date.now());
-      completeFiredRef.current = false;
-    }
+    setRevealed(new Set());
+    completeFiredRef.current = false;
   }
 
   const countdownLabel = useCountdown(deadline, handlePuzzleExpire);
 
+  // repeated (the bubble currency) is server-authoritative now — it lives
+  // in profiles.repeated_pixels, credited via increment_repeated_pixel()
+  // and debited via claim_puzzle_bubble(). This just mirrors it into local
+  // state whenever the profile is (re)loaded, so the UI has something to
+  // render without waiting on a network round trip for every render.
+  useEffect(() => {
+    if (profile) setRepeated(profile.repeated_pixels ?? 0);
+  }, [profile?.repeated_pixels]);
+
   useEffect(() => {
     if (profile && !hydrated) {
-      const saved = profile.puzzle_state ?? { revealed: [], repeated: 0 };
+      const saved = profile.puzzle_state ?? { revealed: [] };
       const savedVersion = saved.version ?? PUZZLE_VERSION;
 
-      if (savedVersion !== PUZZLE_VERSION) {
-        // Version bumped in code since this user last loaded — fresh board, fresh timer.
+      // Discard saved progress if the code version changed, OR if the
+      // global cycle has moved on since this player last saved (e.g. they
+      // haven't opened the app in over 30 days — the countdown's onExpire
+      // never got a chance to fire for them).
+      if (savedVersion !== PUZZLE_VERSION || saved.cycleIndex !== cycleIndex) {
         setRevealed(new Set());
-        setRepeated(0);
-        setPuzzleStartedAt(Date.now());
         completeFiredRef.current = false;
       } else {
         setRevealed(new Set(saved.revealed ?? []));
-        setRepeated(saved.repeated ?? 0);
-        setPuzzleStartedAt(saved.startedAt ?? Date.now());
       }
       setHydrated(true);
     }
@@ -119,23 +142,20 @@ export function PuzzleProvider({ children }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    // repeated_pixels used to be written here as a separate top-level column,
-    // but it's one of the columns protect_profile_reward_columns guards —
-    // any client-side write to it (even alongside other fields in the same
-    // UPDATE) makes the trigger throw and roll back the ENTIRE statement,
-    // silently killing the puzzle_state write too whenever `repeated`
-    // changed since the last save. `repeated` already lives inside
-    // puzzle_state (not trigger-protected), so it's dropped here entirely —
-    // see ProfilePage.jsx, which now reads it from puzzle_state instead.
+    // Only cosmetic board state (which tiles are revealed, which global
+    // cycle they belong to) is persisted here. The bubble currency
+    // (`repeated`) is no longer part of this — it's server-tracked in
+    // profiles.repeated_pixels, credited/debited only through
+    // increment_repeated_pixel() and claim_puzzle_bubble(), so it can't be
+    // forged via a plain profile update.
     updateProfile({
       puzzle_state: {
         revealed: Array.from(revealed),
-        repeated,
-        startedAt: puzzleStartedAt,
+        cycleIndex,
         version: PUZZLE_VERSION,
       },
     });
-  }, [revealed, repeated, puzzleStartedAt]);
+  }, [revealed, cycleIndex]);
 
   // ── Fire completion event once when board fills up ──
   useEffect(() => {
@@ -164,9 +184,14 @@ export function PuzzleProvider({ children }) {
       }
 
       if (prev.has(pick)) {
-        setRepeated(r => r + 1);
+        setRepeated(r => r + 1); // optimistic — reconciled from profile.repeated_pixels above
         setHasNewPixel(true);
         flyReward({ type: 'pixel', fromEl, x, y });
+        if (profile) {
+          supabase.rpc('increment_repeated_pixel').then(({ error }) => {
+            if (error) console.error('increment_repeated_pixel failed:', error);
+          });
+        }
         return prev;
       }
 
@@ -176,7 +201,7 @@ export function PuzzleProvider({ children }) {
       flyReward({ type: 'pixel', fromEl, x, y });
       return next;
     });
-  }, []);
+  }, [profile]);
 
   // Listen for 'earn-pixel' events dispatched by RewardContext when a
   // race-end or weekly-end reward includes pixels. Decouples PuzzleContext
@@ -187,17 +212,20 @@ export function PuzzleProvider({ children }) {
     return () => window.removeEventListener('earn-pixel', handler);
   }, [earnPixel]);
 
-  const claimBubble = useCallback((bubbleId, claimBubbleRewards) => {
+  // claimBubbleFromServer is RewardContext's wrapper around the
+  // claim_puzzle_bubble RPC — cost and reward amounts are hardcoded
+  // server-side, so this is just a client-side affordability pre-check
+  // for instant button feedback. The server re-checks the real balance
+  // regardless, so nothing bad happens if this drifts stale.
+  const claimBubble = useCallback(async (bubbleId, claimBubbleFromServer) => {
     const bubble = BUBBLES.find(b => b.id === bubbleId);
     if (!bubble) return false;
     if (repeated < bubble.cost) return false;
 
-    setRepeated(r => r - bubble.cost);
-    // One RPC call for the whole claim, tagged with a claim-unique task id
-    // (bubbles are redeemable repeatedly, so this isn't a "did this once"
-    // task — the id just keeps the server-side idempotency check from
-    // treating two different claims as duplicates of each other).
-    claimBubbleRewards(bubble.rewards, `bubble-${bubbleId}-${crypto.randomUUID()}`);
+    const updated = await claimBubbleFromServer(bubbleId);
+    if (!updated) return false;
+
+    setRepeated(updated.repeated_pixels ?? 0);
     return true;
   }, [repeated]);
 
@@ -207,7 +235,7 @@ export function PuzzleProvider({ children }) {
     <PuzzleContext.Provider value={{
       revealed, repeated, hasNewPixel,
       earnPixel, claimBubble, clearNewPixel,
-      boardTarget: BOARD_TARGET,
+      boardTarget,
       bubbles:     BUBBLES,
       countdownLabel, deadline,
     }}>
