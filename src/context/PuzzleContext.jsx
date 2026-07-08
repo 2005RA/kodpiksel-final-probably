@@ -81,7 +81,7 @@ export function PuzzleProvider({ children }) {
   const [repeated,  setRepeated]  = useState(0);
   const [hasNewPixel, setHasNewPixel] = useState(false);
   const [puzzleStartedAt, setPuzzleStartedAt] = useState(null);
-  const loadedRef = useRef(false);
+  const [hydrated, setHydrated] = useState(false);
   const completeFiredRef = useRef(false);
 
   const deadline = puzzleStartedAt ? puzzleStartedAt + PUZZLE_DURATION_MS : null;
@@ -98,7 +98,7 @@ export function PuzzleProvider({ children }) {
   const countdownLabel = useCountdown(deadline, handlePuzzleExpire);
 
   useEffect(() => {
-    if (profile && !loadedRef.current) {
+    if (profile && !hydrated) {
       const saved = profile.puzzle_state ?? { revealed: [], repeated: 0 };
       const savedVersion = saved.version ?? PUZZLE_VERSION;
 
@@ -113,12 +113,12 @@ export function PuzzleProvider({ children }) {
         setRepeated(saved.repeated ?? 0);
         setPuzzleStartedAt(saved.startedAt ?? Date.now());
       }
-      loadedRef.current = true;
+      setHydrated(true);
     }
-  }, [profile]);
+  }, [profile, hydrated]);
 
   useEffect(() => {
-    if (!loadedRef.current) return;
+    if (!hydrated) return;
     // repeated_pixels used to be written here as a separate top-level column,
     // but it's one of the columns protect_profile_reward_columns guards —
     // any client-side write to it (even alongside other fields in the same
@@ -139,7 +139,7 @@ export function PuzzleProvider({ children }) {
 
   // ── Fire completion event once when board fills up ──
   useEffect(() => {
-    if (!loadedRef.current) return;
+    if (!hydrated) return;
     if (revealed.size >= 64 && !completeFiredRef.current) {
       completeFiredRef.current = true;
       window.dispatchEvent(new CustomEvent('puzzle-complete'));
