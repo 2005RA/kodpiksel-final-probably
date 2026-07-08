@@ -46,16 +46,23 @@ endsAt: '2026-07-02T15:40:00', // YYYY-MM-DDTHH:MM:SS, your local time
   },
 
   {
-    id: 3,   icon: '🏆', title: 'CSS Turniri #3',
+    id: 3,   icon: '🧪', title: 'Test Yarışı #3',
     course: 'htmlcss', label: 'HTML / CSS',
-status: 'live', date: '2025-01-15', dateLabel: 'Bu gün, 18:00',
-endsAt: '2026-06-30T20:00:00', // YYYY-MM-DDTHH:MM:SS, your local time
-    sub: 'Qalib: ayse_dev · Dünən', prize: '120 Çip',
-    type: 'timed', timeLimit: 240, maxHourglasses: 2,
+status: 'live', date: '2026-07-08', dateLabel: 'Bu gün, 18:00',
+endsAt: '2026-07-08T10:22:20', // YYYY-MM-DDTHH:MM:SS, your local time — set a few minutes in the future before testing
+    sub: 'Test məqsədilə', prize: '20 Çip',
+    type: 'timed', timeLimit: 180, maxHourglasses: 2,
     chips: 20, keys: 2, pixels: 2,
-    taskHtml: `<p>Bitmiş yarış.</p>`,
+    taskHtml: `<p>Bir <span class="code-chip">&lt;h1&gt;</span> yaz, içi boş olmasın.</p>`,
     starter: '<body>\n\n</body>',
-    validate: () => false, chest: null,
+    errorMsg: 'body içində boş olmayan bir h1 olmalıdır.',
+    validate: (code) => {
+      const p = parseBody(code);
+      if (!p) return false;
+      const h1 = p.body.querySelector('h1');
+      return !!h1 && h1.textContent.trim().length > 0;
+    },
+    chest: null,
   },
 
   {

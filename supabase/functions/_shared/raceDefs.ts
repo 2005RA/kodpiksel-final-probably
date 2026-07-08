@@ -92,8 +92,13 @@ export const RACE_DEFS: Record<number, RaceDef> = {
     },
   },
   3: {
-    type: 'timed', timeLimit: 240, chips: 20,
-    validate: () => false, // finished showcase race in the client too
+    type: 'timed', timeLimit: 180, chips: 20,
+    validate: (code) => {
+      const p = parseBody(code);
+      if (!p) return false;
+      const h1 = p.body.querySelector('h1');
+      return !!h1 && h1.textContent!.trim().length > 0;
+    },
   },
   4: {
     type: 'golf', charLimit: 60, chips: 12,
