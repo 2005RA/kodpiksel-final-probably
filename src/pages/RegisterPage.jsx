@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Logo from '../components/Logo';
 
 const AVATARS = [
   { emoji: '🧑‍💻', label: 'Kodçu'    },
@@ -239,8 +240,7 @@ const S = {
     padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: 20,
   },
   header: { textAlign: 'center' },
-  logo: { fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', color: 'var(--teal)', letterSpacing: 2, marginBottom: 12 },
-  title: { fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: 'var(--white)', margin: 0 },
+logo: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', color: 'var(--teal)', letterSpacing: 2, marginBottom: 12 },  title: { fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: 'var(--white)', margin: 0 },
   sub: { fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem', color: 'var(--muted)', marginTop: 6 },
   steps: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, position: 'relative' },
   stepItem: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, zIndex: 1 },

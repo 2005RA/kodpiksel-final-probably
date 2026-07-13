@@ -1,6 +1,7 @@
 // src/pages/LoginPage.jsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import Logo from '../components/Logo';
 
 export default function LoginPage({ onBack, onSwitch, onForgotPassword }) {
   const { loginWithUsername, loginWithGoogle } = useAuth();
@@ -29,7 +30,7 @@ export default function LoginPage({ onBack, onSwitch, onForgotPassword }) {
       <div style={S.card}>
 
         <div style={S.header}>
-          <div style={S.logo}>⌨️ KodPiksel</div>
+          <div style={S.logo}><Logo size={16} /> KodPiksel</div>
           <h1 style={S.title}>Xoş Gəldin!</h1>
           <p style={S.sub}>Davam etmək üçün daxil ol.</p>
         </div>
@@ -91,7 +92,7 @@ const S = {
     boxShadow: '4px 4px 0 var(--teal)', padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: 20,
   },
   header: { textAlign: 'center' },
-  logo: { fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', color: 'var(--teal)', letterSpacing: 2, marginBottom: 12 },
+  logo: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', color: 'var(--teal)', letterSpacing: 2, marginBottom: 12 },
   title: { fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: 'var(--white)', margin: 0 },
   sub: { fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem', color: 'var(--muted)', marginTop: 6 },
   form:  { display: 'flex', flexDirection: 'column', gap: 12 },

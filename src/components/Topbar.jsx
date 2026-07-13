@@ -1,6 +1,7 @@
 // src/components/TopBar.jsx
 
 import { useRewards } from '../context/RewardContext';
+import Logo from './Logo';
 
 export default function TopBar() {
   const { rewards } = useRewards();
@@ -14,7 +15,10 @@ export default function TopBar() {
 
   return (
     <header className="top-bar">
-      <div className="logo">&lt;&gt; Kod<span>Piksel</span></div>
+      <div className="logo logo-row">
+        <Logo size={20} />
+        <span>Kod<span className="logo-piksel">Piksel</span></span>
+      </div>
       <div className="top-right">
         {PILLS.map(p => (
           <div key={p.id} id={p.id} className={`stat-pill ${p.cls}`}>

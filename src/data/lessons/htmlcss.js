@@ -44,34 +44,34 @@ export const SVG = {
 
   // ── Lesson 10 — font-size: same word, three sizes ──────────────────────────
   sizeSteps: `<svg width="320" height="110" viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
-    <text x="10" y="40" fontFamily="sans-serif" fontSize="14" fill="#f4f4f4">Salam</text>
-    <text x="100" y="55" fontFamily="sans-serif" fontSize="28" fill="#f4f4f4">Salam</text>
-    <text x="190" y="85" fontFamily="sans-serif" fontSize="48" fill="#f4f4f4">Salam</text>
-    <text x="10" y="100" fontSize="11" fontFamily="monospace" fill="#a78bfa">14px</text>
-    <text x="100" y="100" fontSize="11" fontFamily="monospace" fill="#a78bfa">28px</text>
-    <text x="190" y="100" fontSize="11" fontFamily="monospace" fill="#a78bfa">48px</text>
+    <text x="10" y="40" fontFamily="sans-serif" font-size="14" fill="#f4f4f4">Kiçik</text>
+    <text x="90" y="40" fontFamily="sans-serif" font-size="23" fill="#f4f4f4">Orta</text>
+    <text x="190" y="40" fontFamily="sans-serif" font-size="40" fill="#f4f4f4">Böyük</text>
+    <text x="10" y="100" font-size="11" fontFamily="monospace" fill="#a78bfa">14px</text>
+    <text x="100" y="100" font-size="11" fontFamily="monospace" fill="#a78bfa">23px</text>
+    <text x="230" y="100" font-size="11" fontFamily="monospace" fill="#a78bfa">40px</text>
   </svg>`,
 
   // ── Lesson 12 — box model: content / padding / border / margin layers ─────
   boxModel: `<svg width="280" height="200" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
-    <rect x="5" y="5" width="270" height="190" fill="#fdf0d5" stroke="#f4c84a" strokeWidth="2" strokeDasharray="6,4"/>
-    <text x="140" y="20" textAnchor="middle" fontSize="11" fontFamily="monospace" fill="#a87d1a">margin</text>
-    <rect x="30" y="35" width="220" height="140" fill="#fff" stroke="#e5503f" strokeWidth="3"/>
-    <text x="140" y="50" textAnchor="middle" fontSize="11" fontFamily="monospace" fill="#e5503f">border</text>
-    <rect x="50" y="60" width="180" height="95" fill="#d4e8f0" stroke="#3A86FF" strokeWidth="2" strokeDasharray="4,3"/>
-    <text x="140" y="78" textAnchor="middle" fontSize="11" fontFamily="monospace" fill="#1a6fbf">padding</text>
-    <rect x="80" y="95" width="120" height="40" fill="#a78bfa" stroke="#1a1a1a" strokeWidth="2"/>
-    <text x="140" y="117" textAnchor="middle" fontSize="11" fontFamily="monospace" fill="#fff">content</text>
+    <rect x="5" y="5" width="270" height="190" fill="#fdf0d5" stroke="#f4c84a" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="140" y="20" textAnchor="middle" font-size="11" fontFamily="monospace" fill="#a87d1a">margin</text>
+    <rect x="30" y="35" width="220" height="140" fill="#fff" stroke="#e5503f" stroke-width="3"/>
+    <text x="140" y="50" textAnchor="middle" font-size="11" fontFamily="monospace" fill="#e5503f">border</text>
+    <rect x="50" y="60" width="180" height="95" fill="#d4e8f0" stroke="#3A86FF" stroke-width="2" stroke-dasharray="4,3"/>
+    <text x="140" y="78" textAnchor="middle" font-size="11" fontFamily="monospace" fill="#1a6fbf">padding</text>
+    <rect x="80" y="95" width="120" height="40" fill="#a78bfa" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="10" y="117" textAnchor="middle" font-size="11" fontFamily="monospace" fill="#fff">content</text>
   </svg>`,
 
   // ── Lesson 13 — border: a plain box gains a visible frame ──────────────────
   borderBox: `<svg width="260" height="110" viewBox="0 0 260 110" xmlns="http://www.w3.org/2000/svg">
     <rect x="10" y="20" width="90" height="60" fill="#fff9e6" stroke="none"/>
-    <text x="55" y="95" textAnchor="middle" fontSize="11" fontFamily="monospace" fill="#888">border yoxdur</text>
-    <line x1="115" y1="50" x2="150" y2="50" stroke="#888" strokeWidth="2"/>
+    <text x="10" y="95" textAnchor="middle" font-size="11" fontFamily="monospace" fill="#888">border yoxdur</text>
+    <line x1="115" y1="50" x2="150" y2="50" stroke="#888" stroke-width="2"/>
     <polygon points="150,44 150,56 160,50" fill="#888"/>
-    <rect x="160" y="20" width="90" height="60" fill="#fff9e6" stroke="#e5503f" strokeWidth="4"/>
-    <text x="205" y="95" textAnchor="middle" fontSize="11" fontFamily="monospace" fill="#e5503f">border var!</text>
+    <rect x="160" y="20" width="90" height="60" fill="#fff9e6" stroke="#e5503f" stroke-width="4"/>
+    <text x="155" y="95" textAnchor="middle" font-size="11" fontFamily="monospace" fill="#e5503f">border var!</text>
   </svg>`,
 };
 
@@ -105,7 +105,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p>Redaktorda <span class="code-chip">&lt;body&gt;</span> teqinin içinə öz adını yaz, sonra <strong>RUN</strong> düyməsinə bas.</p>`,
-    starter: '<body>\n\n</body>',
+    starter: '<html>\n<body>\n\n</body>\n</html>',
     errorMsg: 'Body teqinin içinə bir şey yaz!',
     validate: (code) => {
       // Must have a real <body> with non-empty text content inside it
@@ -132,7 +132,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilinə <span class="code-chip">&lt;h1&gt;Salam, Dünya!&lt;/h1&gt;</span> yaz, sonra <strong>RUN</strong> et.</p>`,
-    starter: '<body>\n\n</body>',
+    starter: '<html>\n<body>\n\n</body>\n</html>',
     errorMsg: 'body içində <h1>Salam, Dünya!</h1> yazılmalıdır — xaricdə olan teqlər sayılmır!',
     validate: (code) => {
       // 1. Əvvəlcə yazının daxilində tam və düzgün bir <h1>...</h1> teqinin olub-olmadığını Regex ilə yoxlayırıq
@@ -170,7 +170,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilinə <span class="code-chip">&lt;p&gt;</span> teqi ilə özün haqqında <strong>ən azı 3 sözlük</strong> bir cümlə yaz.</p>`,
-    starter: '<body>\n\n</body>',
+    starter: '<html>\n<body>\n\n</body>\n</html>',
     errorMsg: 'body içində düzgün bağlanmış <p> olmalı və içində ən azı 3 söz olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -200,7 +200,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;p&gt;</span> yaz, içində ən azı bir söz <span class="code-chip">&lt;strong&gt;</span> ilə, bir söz isə <span class="code-chip">&lt;em&gt;</span> ilə işarələnsin.</p>`,
-    starter: '<body>\n  <p>\n\n  </p>\n</body>',
+    starter: '<html>\n<body>\n  <p>\n\n  </p>\n</body>\n</html>',
     errorMsg: 'p içində həm <strong>, həm də <em> olmalı və hər ikisi düzgün bağlanmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -234,7 +234,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilinə bir <span class="code-chip">&lt;a&gt;</span> teqi ilə istənilən real veb sayta keçid yarat.</p><ul><li><span class="code-chip">href</span> atributu dırnaq içində, <span class="code-chip">https://</span> ilə başlamalıdır</li><li>Ekranda görünən mətn ən azı 1 sözdən ibarət olsun</li></ul>`,
-    starter: '<body>\n\n</body>',
+    starter: '<html>\n<body>\n\n</body>\n</html>',
     errorMsg: 'a teqi düzgün bağlanmalı, href="https://..." dırnaq içində olmalı və üzərində mətn olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -286,7 +286,7 @@ export const LESSONS = {
     `,
         
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;ul&gt;</span> yarat, içində ən azı <strong>3</strong> <span class="code-chip">&lt;li&gt;</span> olsun.</p>`,
-    starter: '<body>\n\n</body>',
+    starter: '<html>\n<body>\n\n</body>\n</html>',
     errorMsg: 'ul düzgün bağlanmalı və içində ən azı 3 li elementi olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -355,7 +355,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilinə bir <span class="code-chip">&lt;img&gt;</span> teqi yaz.</p><ul><li><span class="code-chip">src</span> atributu dolu olmalıdır</li><li><span class="code-chip">alt</span> atributu dolu olmalıdır</li></ul>`,
-    starter: '<body>\n\n</body>',
+    starter: '<html>\n<body>\n\n</body>\n</html>',
     errorMsg: 'img teqinin src="..." və alt="..." atributları dırnaq içində və dolu olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -407,7 +407,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;h1&gt;</span> yaz və <span class="code-chip">style</span> atributundan istifadə edərək ona ya mətn rəngi (<span class="code-chip">color: blue;</span>), ya da şrift ölçüsü (<span class="code-chip">font-size: 24px;</span>) təyin et.</p>`,
-    starter: '<body>\n  \n</body>',
+    starter: '<html>\n<body>\n  \n</body>\n</html>',
     errorMsg: 'h1 teqinin style atributu daxilində düzgün CSS xüsusiyyəti (color və ya font-size) yazılmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -446,7 +446,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;h1&gt;</span> yaz və <span class="code-chip">style="color: ..."</span> ilə mətni <strong>qırmızı (red)</strong> et.</p>`,
-    starter: '<body>\n  <h1 style="">Mənim Başlığım</h1>\n</body>',
+    starter: '<html>\n<body>\n  <h1 style="">Mənim Başlığım</h1>\n</body>\n</html>',
     errorMsg: 'h1 düzgün bağlanmalı, style="color: red" olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -475,7 +475,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;p&gt;</span> yaz və <span class="code-chip">style="font-size: ..."</span> ilə mətnin ölçüsünü <strong>30px-dən böyük</strong> et.</p>`,
-    starter: '<body>\n  <p style="">Salam!</p>\n</body>',
+    starter: '<html>\n<body>\n  <p style="">Salam!</p>\n</body>\n</html>',
     errorMsg: 'p düzgün bağlanmalı, style="font-size: ...px" olmalı və 30px-dən böyük olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -506,7 +506,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;h1&gt;</span> yaz və <span class="code-chip">style="text-align: center;"</span> ilə onu ortaya gətir.</p>`,
-    starter: '<body>\n  <h1 style="">Mənim Başlığım</h1>\n</body>',
+    starter: '<html>\n<body>\n  <h1 style="">Mənim Başlığım</h1>\n</body>\n</html>',
     errorMsg: 'h1 düzgün bağlanmalı, style="text-align: center" olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -536,7 +536,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;p&gt;</span> yaz, <span class="code-chip">style</span> ilə həm <span class="code-chip">padding</span>, həm də <span class="code-chip">margin</span> əlavə et (hər ikisi 0-dan böyük olsun).</p>`,
-    starter: '<body>\n  <p style="">Mətnim</p>\n</body>',
+    starter: '<html>\n<body>\n  <p style="">Mətnim</p>\n</body>\n</html>',
     errorMsg: 'p düzgün bağlanmalı, style içində həm padding, həm margin 0-dan böyük dəyərlə yazılmalıdır.',
     validate: (code) => {
       const p = parseBody(code);
@@ -568,7 +568,7 @@ export const LESSONS = {
       </div>
     `,
     taskHtml: `<p><span class="code-chip">&lt;body&gt;</span> daxilində bir <span class="code-chip">&lt;p&gt;</span> yaz və <span class="code-chip">style="border: ...px solid ...;"</span> ilə ona haşiyə əlavə et.</p>`,
-    starter: '<body>\n  <p style="">Mətnim</p>\n</body>',
+    starter: '<html>\n<body>\n  <p style="">Mətnim</p>\n</body>\n</html>',
     errorMsg: 'p düzgün bağlanmalı, style="border: Npx solid rəng;" formasında olmalıdır.',
     validate: (code) => {
       const p = parseBody(code);

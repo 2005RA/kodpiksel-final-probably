@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocation } from 'react-router-dom';
 import { subscribe, getSnapshot } from '../context/NotifContext';
+import Logo from './Logo';
 
 const TOP_ITEMS = [
   { id: 'home',     emoji: '⌂',  tip: 'Ana Səhifə',      domId: 'sb-home'     },
@@ -65,7 +66,7 @@ export default function Sidebar({ onNav, onNotif, onSettings, hasNewPixel }) {
         onClick={() => onNav('home')}
         aria-label="Ana Səhifə"
       >
-        &lt;&gt;
+        <Logo size={18} />
       </button>
 
       <div className="sb-divider" />

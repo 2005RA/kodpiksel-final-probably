@@ -1,6 +1,7 @@
 // src/pages/ForgotPasswordPage.jsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import Logo from '../components/Logo';
 
 export default function ForgotPasswordPage({ onBack }) {
   const { requestPasswordReset, verifyResetAnswers, resetPassword } = useAuth();
@@ -69,8 +70,7 @@ export default function ForgotPasswordPage({ onBack }) {
     <div style={S.page}>
       <div style={S.card}>
         <div style={S.header}>
-          <div style={S.logo}>⌨️ KodPiksel</div>
-          <h1 style={S.title}>Şifrəni Bərpa Et</h1>
+<div style={S.logo}><Logo size={16} /> KodPiksel</div>          <h1 style={S.title}>Şifrəni Bərpa Et</h1>
         </div>
 
         {error && <div style={S.errorBox}>{error}</div>}
@@ -135,8 +135,7 @@ const S = {
     boxShadow: '4px 4px 0 var(--teal)', padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: 20,
   },
   header: { textAlign: 'center' },
-  logo: { fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', color: 'var(--teal)', letterSpacing: 2, marginBottom: 12 },
-  title: { fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: 'var(--white)', margin: 0 },
+logo: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', color: 'var(--teal)', letterSpacing: 2, marginBottom: 12 },  title: { fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: 'var(--white)', margin: 0 },
   form:  { display: 'flex', flexDirection: 'column', gap: 12 },
   label: { fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 1 },
   input: {

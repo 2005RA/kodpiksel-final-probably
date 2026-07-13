@@ -106,6 +106,7 @@
   font-size: 1.4rem;
   transition: border-color .15s;
 }
+#sb-quicknav { color: var(--white); }
 .sb-profile:hover { border-color: var(--teal); }
 .sb-quicknav-wrap { position: relative; }
 .sb-quicknav-menu {
@@ -125,7 +126,7 @@
   gap: 4px;
   animation: sbQuicknavIn .12s ease-out;
 }
-#sb-quicknav { color: var(--white); }
+
 .sb-quicknav-title {
   font-family: 'JetBrains Mono', monospace;
   font-size: .62rem; font-weight: 700;
@@ -163,13 +164,15 @@
   z-index: 10;
 }
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   font-size: 1.05rem;
   color: var(--teal);
 }
-.logo span { color: var(--white); }
-
+.logo span.logo-piksel { color: var(--white); }
 .stat-pill {
   display: flex; align-items: center; gap: 6px;
   background: rgba(0,0,0,.25);
