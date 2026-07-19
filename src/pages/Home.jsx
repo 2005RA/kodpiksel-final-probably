@@ -25,7 +25,7 @@ const COURSES = [
     ]
   },
   {
-    id: 'python', name: 'Python', lessons: 31, badge: { text: 'TEZLİKLƏ', cls: 'badge-soon' },
+    id: 'python', name: 'Python', lessons: 0, badge: { text: 'TEZLİKLƏ', cls: 'badge-soon' },
     tabColor: '#3A86FF', tabDark: '#2060cc',
     letters: [
       {x:6,y:30,w:3,h:14},{x:9,y:30,w:5,h:3},{x:14,y:33,w:3,h:4},{x:9,y:37,w:5,h:3},
@@ -43,7 +43,7 @@ const COURSES = [
   //   ]
   // },
   {
-    id: 'excel', name: 'Excel', lessons: 18, badge: { text: 'TEZLIKLƏ', cls: 'badge-soon' },
+    id: 'excel', name: 'Excel', lessons: 0, badge: { text: 'TEZLIKLƏ', cls: 'badge-soon' },
     tabColor: '#1D6F42', tabDark: '#155232',
     letters: [
       {x:8,y:30,w:3,h:3},{x:19,y:30,w:3,h:3},

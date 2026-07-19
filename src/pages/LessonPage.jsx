@@ -5,6 +5,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRewards } from '../context/RewardContext';
 import { flyReward  } from '../components/RewardFly';
+import ChestModal     from '../components/ChestModal';
+
+// ── İPUCU HELPERS ────────────────────────────────────────
+// Supports either a single `chest` object (legacy) or a `chests` array with
+// as many hints as a teacher wants to assign — no default count, so a
+// lesson with neither field simply shows no İpucu button at all.
+function getChests(item) {
+  if (Array.isArray(item?.chests)) return item.chests;
+  if (item?.chest) return [item.chest];
+  return [];
+}
 
 // ── MARKER COLORS ────────────────────────────────────────
 const MARKER_COLORS = [
@@ -49,7 +60,7 @@ function Toast({ msg }) {
 
 // ── MAIN COMPONENT ───────────────────────────────────────
 export default function LessonPage({ courseId, lessonId, totalLessons, lessons, lessonChips, onBack, onNavigate }) {
-  const { addChips, completedTasks } = useRewards();
+  const { addChips, completedTasks, rewards, claimNonChipReward } = useRewards();
   const lesson = lessons[lessonId];
 
   const [code,         setCode]         = useState(lesson?.starter || '');
@@ -61,12 +72,17 @@ export default function LessonPage({ courseId, lessonId, totalLessons, lessons, 
   const [markerColor,  setMarkerColor]  = useState(MARKER_COLORS[0]);
   const [taskBounce,   setTaskBounce]   = useState(false);
   const [panelBounce,  setPanelBounce]  = useState(false);
+  const [chestOpen,      setChestOpen]      = useState(() => new Set());
+  const [pendingChestIdx, setPendingChestIdx] = useState(null);
+  const [showChestModal, setShowChestModal] = useState(false);
+  const [bounceHintIdx,  setBounceHintIdx]  = useState(null);
 
   const iframeRef   = useRef(null);
   const taskRef     = useRef(null);
   const explainRef  = useRef(null);
   const chipPillRef = useRef(null);
   const panelBodyRef = useRef(null);
+  const hintRefs      = useRef({});
   useEffect(() => {
     // Save 'course' so your App knows to resume the lesson page on next reload
     localStorage.setItem('lastLesson', 'course');
@@ -84,6 +100,11 @@ export default function LessonPage({ courseId, lessonId, totalLessons, lessons, 
     setShowNext(false);
     setRain(false);
     setPanelBounce(true);
+    setChestOpen(new Set());
+    setPendingChestIdx(null);
+    setShowChestModal(false);
+    setBounceHintIdx(null);
+    hintRefs.current = {};
     
     // 2. Reset both the panel AND the global window just in case your CSS layout is causing the main page to scroll
     setTimeout(() => {
@@ -119,6 +140,19 @@ export default function LessonPage({ courseId, lessonId, totalLessons, lessons, 
     setTimeout(() => setToast(''), 2200);
   }
 
+  // ── MODULE-BASED LOCKING ──────────────────────────────
+  // A lesson is locked if it belongs to a later module ("dərs") than 1 and
+  // any lesson in an earlier module hasn't been completed yet. This mirrors
+  // the module progression shown on CoursePage — a student must finish every
+  // lesson in "Dərs 1" before "Dərs 2" (and so on) unlocks, and the same
+  // rule applies automatically to any future module that gets added.
+  const doneIds      = getDone();
+  const lessonModule = lesson?.module ?? 1;
+  const isLocked = lessonModule > 1 && Object.entries(lessons).some(
+    ([idStr, l]) => (l.module ?? 1) < lessonModule && !doneIds.includes(Number(idStr))
+  );
+  const chests = getChests(lesson);
+
   // Line numbers
   const lines = code.split('\n').length;
   const lineNums = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
@@ -129,7 +163,7 @@ if (iframeRef.current) iframeRef.current.srcdoc = `<!DOCTYPE html><html><head><m
   }
 
   function handleCheck() {
-    if (!lesson || lesson.locked) return;
+    if (!lesson || isLocked) return;
 if (iframeRef.current) iframeRef.current.srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><base target="_blank"></head>${code}</html>`;
     if (!lesson.validate) { showToast('Bu dərsin yoxlaması hələ hazır deyil 🚧'); return; }
 
@@ -155,6 +189,31 @@ if (awarded) flyReward({ type: 'chip', fromEl: chipPillRef.current });
 
   function handleCopy() {
     navigator.clipboard.writeText(code).then(() => showToast('Kopyalandı! 📋'));
+  }
+
+  // ── İPUCU (CHEST) ─────────────────────────────────────
+  function handleChestConfirm() {
+    setShowChestModal(false);
+    const idx = pendingChestIdx;
+    setPendingChestIdx(null);
+    if (idx == null || !chests[idx]) return;
+
+    claimNonChipReward(
+      { keys: -chests[idx].cost },
+      `lesson-chest-${courseId}-${lessonId}-${idx}-${crypto.randomUUID()}`,
+      'lesson_chest'
+    );
+    setChestOpen(prev => new Set(prev).add(idx));
+    showToast('İpucu açıldı! 🗝️');
+
+    // Jump the explanation panel down to the hint that just appeared, so a
+    // student doesn't have to go hunting for it, then give it a little
+    // bounce so it's obvious which one is new.
+    setTimeout(() => {
+      hintRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setBounceHintIdx(idx);
+      setTimeout(() => setBounceHintIdx(null), 650);
+    }, 50);
   }
 
   function handleTaskJump() {
@@ -206,6 +265,13 @@ if (awarded) flyReward({ type: 'chip', fromEl: chipPillRef.current });
     <div className="lp-wrapper">
       <BinaryRain active={rain} onDone={() => setRain(false)} />
       <Toast msg={toast} />
+      <ChestModal
+        open={showChestModal}
+        chest={pendingChestIdx != null ? chests[pendingChestIdx] : null}
+        keys={rewards.key}
+        onConfirm={handleChestConfirm}
+        onCancel={() => { setShowChestModal(false); setPendingChestIdx(null); }}
+      />
 
       {/* ── NAV BAR ── */}
       <nav className="lp-nav">
@@ -306,6 +372,32 @@ if (awarded) flyReward({ type: 'chip', fromEl: chipPillRef.current });
                   dangerouslySetInnerHTML={{ __html: lesson.taskHtml || '' }}
                 />
               </div>
+
+              {chests.length > 0 && !isLocked && (
+                <div className="chest-btn-row">
+                  {chests.map((c, idx) => !chestOpen.has(idx) && (
+                    <button
+                      key={idx}
+                      className="race-chest-btn"
+                      onClick={() => { setPendingChestIdx(idx); setShowChestModal(true); }}
+                    >
+                      📦 İpucu{chests.length > 1 ? ` ${idx + 1}` : ''} ({c.cost}🗝️)
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {chests.map((c, idx) => chestOpen.has(idx) && (
+                <div
+                  key={idx}
+                  ref={el => { hintRefs.current[idx] = el; }}
+                  className={`chest-revealed${bounceHintIdx === idx ? ' bounce' : ''}`}
+                >
+                  <div className="chest-revealed-label">💡 İpucu{chests.length > 1 ? ` ${idx + 1}` : ''}</div>
+                  <div className="chest-hint-text" dangerouslySetInnerHTML={{ __html: c.hint || '' }} />
+                  {c.code && <pre className="chest-hint-code">{c.code}</pre>}
+                </div>
+              ))}
             </div>
           </section>
 
@@ -324,14 +416,14 @@ if (awarded) flyReward({ type: 'chip', fromEl: chipPillRef.current });
                 value={code}
                 onChange={e => setCode(e.target.value)}
                 spellCheck={false}
-                disabled={!!lesson.locked}
+                disabled={isLocked}
               />
             </div>
             <div className="editor-actions">
               <button className="btn btn-reset" onClick={handleReset}>↺ SIFIRLA</button>
               <div className="btn-group">
-                <button className="btn btn-run"   onClick={handleRun}   disabled={!!lesson.locked}>RUN</button>
-                <button className="btn btn-check" onClick={handleCheck} disabled={!!lesson.locked}>CAVABIMI YOXLA</button>
+                <button className="btn btn-run"   onClick={handleRun}   disabled={isLocked}>RUN</button>
+                <button className="btn btn-check" onClick={handleCheck} disabled={isLocked}>CAVABIMI YOXLA</button>
                 {showNext && (
                   <button className="btn btn-next-lesson" onClick={() => onNavigate(lessonId + 1)}>
                     NÖVBƏTİ DƏRS ▶
@@ -356,7 +448,7 @@ if (awarded) flyReward({ type: 'chip', fromEl: chipPillRef.current });
             <div className="preview-area">
               <iframe ref={iframeRef} title="Canlı önizləmə" sandbox="allow-scripts allow-popups" />
               <span className="watermark">PİKSEL BRAUZER V1</span>
-              {lesson.locked && (
+              {isLocked && (
                 <div className="lock-overlay">
                   🔒 Bu bölmə hələ kilidlidir.<br/>Əvvəlki dərsləri tamamla!
                 </div>

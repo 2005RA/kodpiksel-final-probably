@@ -377,7 +377,7 @@ export default function RaceWorkspace({ race, onBack }) {
               {chestOpen && race.chest && (
                 <div className="chest-revealed">
                   <div className="chest-revealed-label">💡 İpucu</div>
-                  <div className="chest-hint-text">{race.chest.hint}</div>
+                  <div className="chest-hint-text" dangerouslySetInnerHTML={{ __html: race.chest.hint || '' }} />
                   {race.chest.code && <pre className="chest-hint-code">{race.chest.code}</pre>}
                 </div>
               )}

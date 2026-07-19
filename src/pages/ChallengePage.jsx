@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRewards } from '../context/RewardContext';
 import { usePuzzle  } from '../context/PuzzleContext';
 import { flyReward  } from '../components/RewardFly';
+import ChestModal     from '../components/ChestModal';
 
 // ── BINARY RAIN ───────────────────────────────────────────
 function BinaryRain({ active, onDone }) {
@@ -40,6 +41,13 @@ function Toast({ msg }) {
   return <div className="toast show">{msg}</div>;
 }
 
+// ── İPUCU HELPERS ────────────────────────────────────────
+function getChests(item) {
+  if (Array.isArray(item?.chests)) return item.chests;
+  if (item?.chest) return [item.chest];
+  return [];
+}
+
 // ── REWARD BADGE ROW ──────────────────────────────────────
 // Shows what this challenge gives before the student starts
 function RewardBadges({ challenge }) {
@@ -70,7 +78,7 @@ function RewardBadges({ challenge }) {
 
 // ── MAIN ──────────────────────────────────────────────────
 export default function ChallengePage({ courseId, challengeId, totalChallenges, challenges, onBack, onNavigate }) {
-  const { addChips, addReward, claimNonChipReward, completedTasks }  = useRewards();
+  const { rewards, addChips, addReward, claimNonChipReward, completedTasks }  = useRewards();
   const { earnPixel }            = usePuzzle();
 
   const challenge = challenges[challengeId];
@@ -81,10 +89,15 @@ export default function ChallengePage({ courseId, challengeId, totalChallenges, 
   const [rain,      setRain]      = useState(false);
   const [showNext,  setShowNext]  = useState(false);
   const [taskBounce, setTaskBounce] = useState(false);
+  const [chestOpen,      setChestOpen]      = useState(() => new Set());
+  const [pendingChestIdx, setPendingChestIdx] = useState(null);
+  const [showChestModal, setShowChestModal] = useState(false);
+  const [bounceHintIdx,  setBounceHintIdx]  = useState(null);
 
   const iframeRef    = useRef(null);
   const taskRef      = useRef(null);
   const rewardRef    = useRef(null); // fly origin
+  const hintRefs     = useRef({});
 
   // Reset when challenge changes
   useEffect(() => {
@@ -94,6 +107,11 @@ export default function ChallengePage({ courseId, challengeId, totalChallenges, 
     setError('');
     setShowNext(false);
     setRain(false);
+    setChestOpen(new Set());
+    setPendingChestIdx(null);
+    setShowChestModal(false);
+    setBounceHintIdx(null);
+    hintRefs.current = {};
     window.scrollTo(0, 0);
     if (iframeRef.current) iframeRef.current.srcdoc = '';
   }, [challengeId, challenges]);
@@ -121,6 +139,7 @@ export default function ChallengePage({ courseId, challengeId, totalChallenges, 
 
   const lines    = code.split('\n').length;
   const lineNums = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+  const chests   = getChests(challenge);
 
   function handleRun() {
     if (iframeRef.current) {
@@ -188,6 +207,28 @@ export default function ChallengePage({ courseId, challengeId, totalChallenges, 
     if (iframeRef.current) iframeRef.current.srcdoc = '';
   }
 
+  // ── İPUCU (CHEST) ─────────────────────────────────────
+  function handleChestConfirm() {
+    setShowChestModal(false);
+    const idx = pendingChestIdx;
+    setPendingChestIdx(null);
+    if (idx == null || !chests[idx]) return;
+
+    claimNonChipReward(
+      { keys: -chests[idx].cost },
+      `challenge-chest-${courseId}-${challengeId}-${idx}-${crypto.randomUUID()}`,
+      'challenge_chest'
+    );
+    setChestOpen(prev => new Set(prev).add(idx));
+    showToast('İpucu açıldı! 🗝️');
+
+    setTimeout(() => {
+      hintRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setBounceHintIdx(idx);
+      setTimeout(() => setBounceHintIdx(null), 650);
+    }, 50);
+  }
+
   function handleCopy() {
     navigator.clipboard.writeText(code).then(() => showToast('Kopyalandı! 📋'));
   }
@@ -202,6 +243,13 @@ export default function ChallengePage({ courseId, challengeId, totalChallenges, 
     <div className="lp-wrapper">
       <BinaryRain active={rain} onDone={() => setRain(false)} />
       <Toast msg={toast} />
+      <ChestModal
+        open={showChestModal}
+        chest={pendingChestIdx != null ? chests[pendingChestIdx] : null}
+        keys={rewards.key}
+        onConfirm={handleChestConfirm}
+        onCancel={() => { setShowChestModal(false); setPendingChestIdx(null); }}
+      />
 
       {/* ── NAV BAR ── */}
       <nav className="lp-nav">
@@ -241,6 +289,32 @@ export default function ChallengePage({ courseId, challengeId, totalChallenges, 
                   dangerouslySetInnerHTML={{ __html: challenge.taskHtml || '' }}
                 />
               </div>
+
+              {chests.length > 0 && (
+                <div className="chest-btn-row">
+                  {chests.map((c, idx) => !chestOpen.has(idx) && (
+                    <button
+                      key={idx}
+                      className="race-chest-btn"
+                      onClick={() => { setPendingChestIdx(idx); setShowChestModal(true); }}
+                    >
+                      📦 İpucu{chests.length > 1 ? ` ${idx + 1}` : ''} ({c.cost}🗝️)
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {chests.map((c, idx) => chestOpen.has(idx) && (
+                <div
+                  key={idx}
+                  ref={el => { hintRefs.current[idx] = el; }}
+                  className={`chest-revealed${bounceHintIdx === idx ? ' bounce' : ''}`}
+                >
+                  <div className="chest-revealed-label">💡 İpucu{chests.length > 1 ? ` ${idx + 1}` : ''}</div>
+                  <div className="chest-hint-text" dangerouslySetInnerHTML={{ __html: c.hint || '' }} />
+                  {c.code && <pre className="chest-hint-code">{c.code}</pre>}
+                </div>
+              ))}
             </div>
           </section>
 

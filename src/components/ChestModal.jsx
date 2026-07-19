@@ -10,10 +10,10 @@ export default function ChestModal({ open, chest, keys, onConfirm, onCancel }) {
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <div className="modal-icon">🗝️</div>
-        <div className="modal-title">Sandığı aç?</div>
+        <div className="modal-title">Sandığı açmaq istədiyinə əminsən?</div>
         <div className="modal-body">
           Bu sandıq <strong>{chest.cost} açar</strong> tələb edir.
-          Hal-hazırda sende <strong>{keys} açar</strong> var.
+          Hal-hazırda <strong>{keys} açarın</strong> var.
           {!canAfford && (
             <div className="modal-warning">⚠ Kifayət qədər açarın yoxdur!</div>
           )}

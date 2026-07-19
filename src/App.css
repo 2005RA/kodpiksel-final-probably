@@ -1874,12 +1874,19 @@ git push origin main */
 }
 .blind-overlay span:first-child { font-size: 2.5rem; }
 
+/* Chest button row — one per unopened chest, wraps if a teacher stacks several */
+.chest-btn-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 14px;
+}
+
 /* Chest revealed */
 .chest-revealed {
   background: rgba(167,139,250,.06);
   border: 1px solid rgba(167,139,250,.25);
   padding: 14px 16px; margin-top: 14px;
 }
+.chest-revealed.bounce { animation: task-bounce .6s ease; }
 .chest-revealed-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: .65rem; font-weight: 700;

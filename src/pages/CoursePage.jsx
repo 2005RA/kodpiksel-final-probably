@@ -128,8 +128,18 @@ export default function CoursePage({ course, onBack, onLesson }) {
       <p className="page-sub">{course.description}</p>
 
       {/* Modules */}
-      {course.modules.map(mod => {
-        const isLocked   = mod.status === 'locked';
+      {course.modules.map((mod, modIdx) => {
+        // A module is "manually" locked when its data explicitly marks it
+        // that way (e.g. a module that isn't built yet). On top of that, any
+        // module past the first is auto-locked until every lesson in every
+        // earlier module ("Dərs 1", "Dərs 2", ...) is completed — this way
+        // adding a brand-new module (e.g. "Dərs 3 — Sayt Yığmaq") locks it
+        // automatically with no extra wiring needed.
+        const manuallyLocked = mod.status === 'locked';
+        const priorModulesDone = course.modules
+          .slice(0, modIdx)
+          .every(m => m.lessons.length > 0 && m.lessons.every(l => done.includes(l.id)));
+        const isLocked   = manuallyLocked || (modIdx > 0 && !priorModulesDone);
         const donInMod   = mod.lessons.filter(l => done.includes(l.id)).length;
         const activeId   = isLocked ? null : getActive(mod.lessons);
         const isHidden   = collapsed[mod.id];
@@ -148,7 +158,7 @@ export default function CoursePage({ course, onBack, onLesson }) {
                     : <span className="badge badge-active">✓ TAMAMLANDI</span>
               }
               {isLocked
-                ? <button className="btn-soon" disabled>Yaxında</button>
+                ? <button className="btn-soon" disabled>Kilidli</button>
                 : <button className="btn-toggle" onClick={() => toggleModule(mod.id)}>
                     {isHidden ? '▶ Göstər' : '▼ Gizlət'}
                   </button>
@@ -161,7 +171,7 @@ export default function CoursePage({ course, onBack, onLesson }) {
             {/* Battery */}
             <div className="battery-row">
               <span className={`battery-label${isLocked ? ' locked-text' : ''}`}>
-                BATARYA İNDİKATORU:
+                BATARYA:
               </span>
               <Battery
                 total={mod.lessonCount}
