@@ -58,7 +58,7 @@ const COURSES = [
 const CHALLENGES = Object.values(HTMLCSS_CHALLENGES).map(c => ({
   id:         c.id,
   courseId:   'htmlcss',
-  lang:       'HTML',
+  lang:       'HTML / CSS',
   cls:        'html',
   name:       c.title,
   difficulty: c.difficulty === 'ASAN' ? 1 : c.difficulty === 'ORTA' ? 2 : 3,
@@ -188,7 +188,6 @@ export default function Home({ onCourseClick, onChallengeClick, onGoTo, onRaceCl
         <div className="ch-task-name">{ch.name}</div>
         <div className="ch-meta">
           <Difficulty level={ch.difficulty}/>
-          <span style={{ fontSize: '.68rem', color: 'var(--muted)' }}>🖥️ {ch.chips} çip</span>
         </div>
       </div>
     ))}

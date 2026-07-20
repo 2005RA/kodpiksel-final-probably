@@ -127,24 +127,24 @@ export default function ChallengesPage({ onChallengeClick, onBack }) {
                 {/* Top row */}
                 <div className="allch-top">
                   <span className={`ch-lang ${ch.cls}`}>{ch.courseLabel}</span>
-                  <span
+                  {/* <span
                     className="allch-diff"
                     style={{ color: DIFF_COLORS[ch.difficulty] }}
                   >
                     {ch.difficulty}
-                  </span>
+                  </span> */}
                 </div>
 
                 {/* Title */}
                 <div className="allch-title">{ch.title}</div>
 
-                {/* Rewards */}
+                {/* Rewards
                 <div className="allch-rewards">
                   {ch.chips       > 0 && <span>🖥️ ×{ch.chips}</span>}
                   {ch.keys        > 0 && <span>🗝️ ×{ch.keys}</span>}
                   {ch.hourglasses > 0 && <span>⏳ ×{ch.hourglasses}</span>}
                   {ch.pixels      > 0 && <span>🧩 ×{ch.pixels}</span>}
-                </div>
+                </div> */}
 
                 {/* Bottom */}
                 <div className="allch-bottom">
