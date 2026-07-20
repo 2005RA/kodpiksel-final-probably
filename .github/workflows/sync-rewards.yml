@@ -1,0 +1,32 @@
+name: Sync task rewards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/data/lessons/**'
+      - 'src/data/challenges/**'
+      - 'src/data/levelRewards.js'
+
+jobs:
+  sync-rewards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Generate task_rewards SQL
+        run: node scripts/sync-task-rewards.mjs
+
+      - name: Install postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Apply SQL to Supabase
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: psql "$SUPABASE_DB_URL" -f supabase/generated-task-rewards.sql
